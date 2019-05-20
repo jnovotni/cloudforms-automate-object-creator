@@ -1,0 +1,54 @@
+create a method:
+
+- verify that you are in a .class directory or a __methods__ directory
+- create __methods__ directory if it doesn't already exist 
+- create the method's ruby file inside the __methods__ directory
+- create a corresponding yaml definition for the ruby file
+
+-pass in method name, method type
+
+
+=======================================================================
+
+Create a class:
+
+- verify that you are under a namespace? not under a __method__ or .class?
+- create the directory with '.class' appended to the name
+- create a __class__.yaml file under the .class directory
+
+- pass in class name
+
+- prompt user, "add a field? [y/n]: "
+- "field type [attribute, relationship, method, state]: "
+- "field name: "
+- "field datatype [string, integer, array, ???]: "
+- "default value [leave blank for none]: "
+- "message [leave blank for none]: "
+- "on entry [leave blank for none]: "
+- "on exit [leave blank for none]: "
+- "on error [leave blank for none]: "
+- "max retries [leave blank for no limit]: "
+
+========================================================================
+
+Create an instance:
+
+- verify that you're under a .class directory
+- create a yaml file
+
+- pass in instance's name
+
+- prompt user, "use class defaults? [y/n]: "
+*** if user selects no ***
+- "which field would you like to modify? [rel1,meth1,...list all fields]: "
+- "value for selected field?: "
+
+========================================================================
+
+Create a namespace:
+
+- verify that you're under a namespace? not under a __method__ or .class?
+- create __namespace__.yaml under the namespace folder
+
+- pass in namespace's name
+
