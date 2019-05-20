@@ -19,20 +19,56 @@ def create_method(method_name)
   return 0
 end
 
-def create_instance(instance_name)
-  # verify that we're under a .class directory
+def create_instance()
+  # verify that we're under a .class directory... check for existence of __class__.yaml
+  if !File.exists?("__class__.yaml")
+    puts "You must be in a class's directory. Look for directories with '.class' in the name and that contain a __class__.yaml file."
+    exit 1
+  end
+
+  class_definition = YAML.load_file("__class__.yaml")
   instance_definition = YAML.load_file("#{__dir__}/object_templates/instance.yaml")
+
+  puts "Enter the desired instance name"
+  instance_name = STDIN.gets.chomp
   instance_definition["object"]["attributes"]["name"] = instance_name
 
   puts "Would you like you use the class defaults? [y/n]"
   use_class_defaults = STDIN.gets.chomp
   if use_class_defaults == "n"
-    puts "This feature has not yet been implemented"
-    #Need to pull the class definition to see what fields are available, not the instance
-    #fields = instance_definition["object"]["fields"]
-    #puts "Which field would you like to modify? [#{fields.keys}]"
-  end
+    fields = ""
+    class_definition["object"]["schema"].each do |field|
+      fields += field["field"]["name"] + " "
+    end
 
+    continue = true
+    while continue
+      puts "Which field would you like to modify? Leave blank to exit."
+      puts "#{fields}"
+      field_name = STDIN.gets.chomp
+      while !fields.include?(field_name)
+        puts "There is no field named #{field_name}. Please select a field from the list below"
+        puts "#{fields}"
+        field_name = STDIN.gets.chomp
+      end
+
+      if field_name == ""
+        continue = false
+        break
+      end
+
+      puts "Enter the new value"
+      field_value = STDIN.gets.chomp
+
+      # The yaml object is a little akward to work with...
+      # Make sure you have the fields attribute created
+      if instance_definition["object"]["fields"].nil?
+        instance_definition["object"]["fields"] = []
+      end
+      # Add the field and the value to the instance definition
+      instance_definition["object"]["fields"].append({"#{field_name}" => {"value" => "#{field_value}"}})
+    end
+  end
   File.write("#{instance_name}.yaml", instance_definition.to_yaml)
   return 0
 end
@@ -44,9 +80,7 @@ begin
     method_name = STDIN.gets.chomp
     create_method(method_name)
   when "instance"
-    puts "Enter the desired instance name"
-    instance_name = STDIN.gets.chomp
-    create_instance(instance_name)
+    create_instance()
   else
     puts "Object type of #{OBJECT_TYPE} is not recognized"
     return 0
