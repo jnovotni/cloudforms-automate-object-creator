@@ -19,16 +19,38 @@ def create_method(method_name)
   return 0
 end
 
+def create_instance(instance_name)
+  # verify that we're under a .class directory
+  instance_definition = YAML.load_file("#{__dir__}/object_templates/instance.yaml")
+  instance_definition["object"]["attributes"]["name"] = instance_name
+
+  puts "Would you like you use the class defaults? [y/n]"
+  use_class_defaults = STDIN.gets.chomp
+  if use_class_defaults == "n"
+    puts "This feature has not yet been implemented"
+    #Need to pull the class definition to see what fields are available, not the instance
+    #fields = instance_definition["object"]["fields"]
+    #puts "Which field would you like to modify? [#{fields.keys}]"
+  end
+
+  File.write("#{instance_name}.yaml", instance_definition.to_yaml)
+  return 0
+end
+
 begin
   case OBJECT_TYPE
   when "method"
     puts "Enter the desired method name"
     method_name = STDIN.gets.chomp
     create_method(method_name)
+  when "instance"
+    puts "Enter the desired instance name"
+    instance_name = STDIN.gets.chomp
+    create_instance(instance_name)
   else
     puts "Object type of #{OBJECT_TYPE} is not recognized"
     return 0
   end
-  puts "method created"
+  puts "#{OBJECT_TYPE} created"
   return 0
 end
