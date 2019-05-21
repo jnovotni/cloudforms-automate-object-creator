@@ -22,8 +22,8 @@ end
 def create_instance()
   # verify that we're under a .class directory... check for existence of __class__.yaml
   if !File.exists?("__class__.yaml")
-    puts "You must be in a class's directory. Look for directories with '.class' in the name and that contain a __class__.yaml file."
-    exit 1
+    puts "You must be in a class's directory to create an Instance"
+    exit 0
   end
 
   class_definition = YAML.load_file("__class__.yaml")
@@ -43,7 +43,7 @@ def create_instance()
 
     continue = true
     while continue
-      puts "Which field would you like to modify? Leave blank to exit."
+      puts "Which field would you like to modify? Leave blank to exit"
       puts "#{fields}"
       field_name = STDIN.gets.chomp
       while !fields.include?(field_name)
@@ -73,6 +73,40 @@ def create_instance()
   return 0
 end
 
+def create_class()
+  # verify that you are in a namespace... look for __namespace__.yaml
+  if !File.exists?("__namespace__.yaml")
+    puts "You must be in a namespace's directory to create a Class"
+    exit 0
+  end
+
+  puts "Enter the desired class name"
+  class_name = STDIN.gets.chomp
+
+  #import class definition
+  class_definition = YAML.load_file("#{__dir__}/object_templates/class.yaml")
+
+  loop do
+    puts "Would you like to add a field to the class? [y/n]"
+    add_field = STDIN.gets.chomp
+    if add_field == "n"
+      break
+    elsif add_field == "y"
+      field_attributes = collect_field_attributes()
+      #modify class definition
+      #if [object][schema].nil?
+        #creat [object][schema]
+      #[object][schema] = [{field => {}...yadda yadda
+    end
+
+  end
+
+  #create the directory with '.class' appended to the name
+  Dir.mkdir "#{class_name}+.class"
+  #write the file to disk
+  return 0
+end
+
 begin
   case OBJECT_TYPE
   when "method"
@@ -81,6 +115,11 @@ begin
     create_method(method_name)
   when "instance"
     create_instance()
+  when "class"
+    create_class()
+  when ""
+    puts "This script requires an automate object type as a paramater [method, instance, class, or namespace]"
+    return 0
   else
     puts "Object type of #{OBJECT_TYPE} is not recognized"
     return 0
