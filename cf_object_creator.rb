@@ -107,62 +107,89 @@ def create_class()
   #import class definition
   class_definition = YAML.load_file("#{__dir__}/object_templates/class.yaml")
 
+  # Need to track priority
+  priority = 1
   loop do
-    puts "Would you like to add a field to the class? [y/n]"
+    puts "Would you like to add a field to the class's schema? [y/n]"
     add_field = STDIN.gets.chomp
     if add_field == "n"
       break
     elsif add_field == "y"
-      field_attributes = {}
-
-      #--Get all of the necessary values from the user--
-      #may want a method here... field_attributes = collect_field_attributes()
-      puts "field type [attribute, relationship, method, state]:"
-      field_type = STDIN.gets.chomp
-
-      puts "field name:"
-      field_name = STDIN.gets.chomp
-
-      #TODO: find out what datatypes there are
-      puts "field datatype [string, integer, array, etc]"
-      field_datatype = STDIN.gets.chomp
-
-      puts "default value [leave blank for no default]:"
-      default_value = STDIN.gets.chomp
-
-      puts "message [leave blank for no message]:"
-      message = STDIN.gets.chomp
-
-      puts "collect [leave blank to collect nothing]:"
-      collect = STDIN.gets.chomp
-
-      puts "on entry [leave blank for no action]:"
-      on_entry = STDIN.gets.chomp
-
-      puts "on exit [leave blank for no action]:"
-      on_exit = STDIN.gets.chomp
-
-      puts "on error [leave blank for no action]:"
-      on_error = STDIN.gets.chomp
-
-      puts "max retries [leave blank for no limit]:"
-      max_retries = STDIN.gets.chomp
-      #--End of getting values from user--
+      schema_field_options = {}
+      schema_field_options["priority"] = priority
+      collect_schema_field_options(schema_field_options)
 
       #modify class definition
       if class_definition["object"]["schema"].nil?
         class_definition["object"]["schema"]=[]
       end
-      #Need to set the priority (order)
-      #Create a field definition and work with that object instead of the line below
-      #class_definition["object"]["schema"].append({"field" => {})#
-    end
 
+      #Create a field definition and work with that object instead of the line below
+      schema_field_definition = YAML.load_file("#{__dir__}/object_templates/schema_field.yaml")
+      update_schema(class_definition, schema_field_definition, schema_field_options)
+
+      # Track the priority of the field
+      priority += 1
+    end
   end
 
   #create the directory with '.class' appended to the name
-  Dir.mkdir "#{class_name}+.class"
-  #write the file to disk
+  puts "creating class directory"
+  Dir.mkdir("#{class_name}.class")
+  puts "changing to class directory"
+  Dir.chdir("#{class_name}.class")
+  # write the file to disk
+  puts "creating class yaml file"
+  File.write("#{class_name}.yaml", class_definition.to_yaml)
+  return 0
+end
+
+# This method prompts the user for several options related to the field
+# It will populate the schema_field_options hash with the values
+def collect_schema_field_options(schema_field_options)
+  puts "field type [attribute, relationship, method, state]:"
+  schema_field_options["aetype"] = "#{STDIN.gets.chomp}"
+
+  puts "field name:"
+  schema_field_options["name"] = "#{STDIN.gets.chomp}"
+
+  #TODO: find out what datatypes there are
+  puts "field datatype [string, integer, array, etc]"
+  schema_field_options["datatype"] = "#{STDIN.gets.chomp}"
+
+  puts "default value [leave blank for no default]:"
+  schema_field_options["default_value"] = "#{STDIN.gets.chomp}"
+
+  puts "message [leave blank for no message]:"
+  schema_field_options["message"] = "#{STDIN.gets.chomp}"
+
+  puts "collect [leave blank to collect nothing]:"
+  schema_field_options["collect"] = STDIN.gets.chomp
+
+  puts "on entry [leave blank for no action]:"
+  schema_field_options["on_entry"] = STDIN.gets.chomp
+
+  puts "on exit [leave blank for no action]:"
+  schema_field_options["on_exit"] = STDIN.gets.chomp
+
+  puts "on error [leave blank for no action]:"
+  schema_field_options["on_error"] = STDIN.gets.chomp
+
+  puts "max retries [leave blank for no limit]:"
+  schema_field_options["max_retries"] = "#{STDIN.gets.chomp}"
+
+  return 0
+end
+
+# This method will update the class definition with the new field
+def update_schema(class_definition, schema_field_definition, schema_field_options)
+  # Loop through field values and update the schema_field_definition
+  schema_field_options.each do |option|
+    schema_field_definition["field"]["#{option[0]}"] = option[1]
+  end
+
+  # Add the field to the class definitio
+  class_definition["object"]["schema"].append(schema_field_definition)
   return 0
 end
 
