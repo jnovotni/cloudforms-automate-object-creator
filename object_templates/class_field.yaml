@@ -1,0 +1,20 @@
+- field:
+      aetype:
+      name:
+      display_name:
+      datatype:
+      priority:
+      owner:
+      default_value:
+      substitute: true
+      message:
+      visibility:
+      collect:
+      scope:
+      description:
+      condition:
+      on_entry:
+      on_exit:
+      on_error:
+      max_retries:
+      max_time:

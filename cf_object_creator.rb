@@ -4,13 +4,34 @@ require 'yaml'
 
 OBJECT_TYPE = ARGV[0]
 
-def create_method(method_name)
-  # Check if we're under a .class directory or a __methods__ directory
-    # Create __methods__ directory if it doesn't exist
+def create_method()
+  # Check if we're in a .class directory or a __methods__ directory
+  is_class_directory = File.exists?("__class__.yaml")
+  is_methods_directory = (Dir.pwd.split('/')[-1] == "__methods__")
+  if !is_class_directory && !is_methods_directory
+    puts "You must be in a class's directory or a __methods__ directory to create a method"
+    exit 0
+  end
+
+  # Create __methods__ directory if it doesn't exist
+  if !is_methods_directory && !File.directory?("__methods__")
+    puts "creating __methods__ directory"
+    Dir.mkdir("__methods__")
+  end
+
+  # If we're not already in the __methods__ directory, move into it
+  if !is_methods_directory
+    puts "changing to __methods__ dir"
+    Dir.chdir("__methods__")
+  end
+
+  # Get the method name
+  puts "Enter the desired method name"
+  method_name = STDIN.gets.chomp
   # Create empty Ruby file under __methods__ directory
   File.write("#{method_name}.rb","")
-  # Create a corresponding yaml definition for the method from the template
-    # Read yaml template and create object
+
+  # Read yaml template and create object
   method_definition = YAML.load_file("#{__dir__}/object_templates/method.yaml")
   # Set the method's name
   method_definition["object"]["attributes"]["name"] = method_name
@@ -92,11 +113,49 @@ def create_class()
     if add_field == "n"
       break
     elsif add_field == "y"
-      field_attributes = collect_field_attributes()
+      field_attributes = {}
+
+      #--Get all of the necessary values from the user--
+      #may want a method here... field_attributes = collect_field_attributes()
+      puts "field type [attribute, relationship, method, state]:"
+      field_type = STDIN.gets.chomp
+
+      puts "field name:"
+      field_name = STDIN.gets.chomp
+
+      #TODO: find out what datatypes there are
+      puts "field datatype [string, integer, array, etc]"
+      field_datatype = STDIN.gets.chomp
+
+      puts "default value [leave blank for no default]:"
+      default_value = STDIN.gets.chomp
+
+      puts "message [leave blank for no message]:"
+      message = STDIN.gets.chomp
+
+      puts "collect [leave blank to collect nothing]:"
+      collect = STDIN.gets.chomp
+
+      puts "on entry [leave blank for no action]:"
+      on_entry = STDIN.gets.chomp
+
+      puts "on exit [leave blank for no action]:"
+      on_exit = STDIN.gets.chomp
+
+      puts "on error [leave blank for no action]:"
+      on_error = STDIN.gets.chomp
+
+      puts "max retries [leave blank for no limit]:"
+      max_retries = STDIN.gets.chomp
+      #--End of getting values from user--
+
       #modify class definition
-      #if [object][schema].nil?
-        #creat [object][schema]
-      #[object][schema] = [{field => {}...yadda yadda
+      if class_definition["object"]["schema"].nil?
+        class_definition["object"]["schema"]=[]
+      end
+      #Need to set the priority (order)
+      #Create a field definition and work with that object instead of the line below
+      #class_definition["object"]["schema"].append({"field" => {})#
     end
 
   end
@@ -110,18 +169,13 @@ end
 begin
   case OBJECT_TYPE
   when "method"
-    puts "Enter the desired method name"
-    method_name = STDIN.gets.chomp
-    create_method(method_name)
+    create_method()
   when "instance"
     create_instance()
   when "class"
     create_class()
-  when ""
-    puts "This script requires an automate object type as a paramater [method, instance, class, or namespace]"
-    return 0
   else
-    puts "Object type of #{OBJECT_TYPE} is not recognized"
+    puts "This script requires an automate object type as a paramater [method, instance, class, or namespace]"
     return 0
   end
   puts "#{OBJECT_TYPE} created"
