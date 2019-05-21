@@ -1,7 +1,7 @@
 create a method:
 
 - verify that you are in a .class directory or a __methods__ directory
-- create __methods__ directory if it doesn't already exist 
+- create __methods__ directory if it doesn't already exist
 - create the method's ruby file inside the __methods__ directory
 - create a corresponding yaml definition for the ruby file
 
@@ -24,6 +24,7 @@ Create a class:
 - "field datatype [string, integer, array, ???]: "
 - "default value [leave blank for none]: "
 - "message [leave blank for none]: "
+- "collect [leave blank for none]: "
 - "on entry [leave blank for none]: "
 - "on exit [leave blank for none]: "
 - "on error [leave blank for none]: "
@@ -51,4 +52,3 @@ Create a namespace:
 - create __namespace__.yaml under the namespace folder
 
 - pass in namespace's name
-
