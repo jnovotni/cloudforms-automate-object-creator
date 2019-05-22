@@ -201,16 +201,26 @@ def create_namespace()
     return 0
   end
 
+  puts "Enter the desired instance name"
+  namespace_name = STDIN.gets.chomp
+
   # Create the directory
+  puts "creating namespace directory"
+  Dir.mkdir("#{namespace_name}")
 
   # Change to the directory
+  puts "changing to new directory"
+  Dir.chdir("#{namespace_name}")
 
   # Read in namespace yaml template
+  namespace_definition = YAML.load_file("#{__dir__}/object_templates/namespace.yaml")
 
   # Modify the template
+  namespace_definition["object"]["attributes"]["name"] = namespace_name
 
   # Write the yaml file to disk
-
+  puts "creating namespace yaml file"
+  File.write("__namespace__.yaml", namespace_definition.to_yaml)
   return 0
 end
 
