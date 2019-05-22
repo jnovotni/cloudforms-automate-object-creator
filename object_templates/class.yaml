@@ -5,8 +5,8 @@ object:
   attributes:
     description:
     display_name:
-    name: Naming
+    name: 
     type:
     inherits:
     visibility:
-    owner: 
+    owner:
