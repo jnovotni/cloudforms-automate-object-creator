@@ -150,7 +150,7 @@ def create_class()
 end
 
 # This method prompts the user for several options related to the field
-# It will populate the schema_field_options hash with the values
+# It will populate the schema_field_definition hash with the values
 def collect_schema_field_options(schema_field_definition)
   puts "field type [attribute, relationship, method, state]:"
   schema_field_definition["field"]["aetype"] = STDIN.gets.chomp
@@ -183,11 +183,6 @@ def collect_schema_field_options(schema_field_definition)
   puts "max retries [leave blank for no limit]:"
   schema_field_definition["field"]["max_retries"] = "#{STDIN.gets.chomp}"
 
-  return 0
-end
-
-  # Add the field to the class definitio
-  class_definition["object"]["schema"].append(schema_field_definition)
   return 0
 end
 
