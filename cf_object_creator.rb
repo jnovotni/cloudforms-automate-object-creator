@@ -10,7 +10,7 @@ def create_method()
   is_methods_directory = (Dir.pwd.split('/')[-1] == "__methods__")
   if !is_class_directory && !is_methods_directory
     puts "You must be in a class's directory or a __methods__ directory to create a method"
-    exit 0
+    return 0
   end
 
   # Create __methods__ directory if it doesn't exist
@@ -45,7 +45,7 @@ def create_instance()
   # verify that we're under a .class directory... check for existence of __class__.yaml
   if !File.exists?("__class__.yaml")
     puts "You must be in a class's directory to create an Instance"
-    exit 0
+    return 0
   end
 
   class_definition = YAML.load_file("__class__.yaml")
@@ -100,7 +100,7 @@ def create_class()
   # verify that you are in a namespace... look for __namespace__.yaml
   if !File.exists?("__namespace__.yaml")
     puts "You must be in a namespace's directory to create a Class"
-    exit 0
+    return 0
   end
 
   #import class definition
@@ -151,6 +151,14 @@ end
 
 # This method prompts the user for several options related to the field
 # It will populate the schema_field_definition hash with the values
+#
+# could try something like...
+# schema_field_definition["field"].each do |option|
+#   puts "#{option} [leave blank for no value]"
+#   schema_field_definition["field"]["#{option}"] = STDIN.gets.chomp
+#   need to leave the populated values (priority and name) alone
+#     unless ["field"]["#{option}"].to_s.empty?
+#
 def collect_schema_field_options(schema_field_definition)
   puts "field type [attribute, relationship, method, state]:"
   schema_field_definition["field"]["aetype"] = STDIN.gets.chomp
@@ -186,6 +194,36 @@ def collect_schema_field_options(schema_field_definition)
   return 0
 end
 
+def create_namespace()
+  # make sure you're in a domain or another namespace
+  if !File.exists?("__domain__.yaml") && !File.exists?("__namespace__.yaml")
+    puts "you must be in a domain or namespace directory"
+    return 0
+  end
+
+  puts "Enter the desired instance name"
+  namespace_name = STDIN.gets.chomp
+
+  # Create the directory
+  puts "creating namespace directory"
+  Dir.mkdir("#{namespace_name}")
+
+  # Change to the directory
+  puts "changing to new directory"
+  Dir.chdir("#{namespace_name}")
+
+  # Read in namespace yaml template
+  namespace_definition = YAML.load_file("#{__dir__}/object_templates/namespace.yaml")
+
+  # Modify the template
+  namespace_definition["object"]["attributes"]["name"] = namespace_name
+
+  # Write the yaml file to disk
+  puts "creating namespace yaml file"
+  File.write("__namespace__.yaml", namespace_definition.to_yaml)
+  return 0
+end
+
 begin
   case OBJECT_TYPE
   when "method"
@@ -194,6 +232,8 @@ begin
     create_instance()
   when "class"
     create_class()
+  when "namespace"
+    create_namespace()
   else
     puts "This script requires an automate object type as a paramater [method, instance, class, or namespace]"
     return 0
