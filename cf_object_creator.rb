@@ -132,10 +132,6 @@ def create_class()
       # Add the field to the class definition
       class_definition["object"]["schema"].append(schema_field_definition)
 
-      #Create a field definition and work with that object instead of the line below
-      #schema_field_definition = YAML.load_file("#{__dir__}/object_templates/schema_field.yaml")
-      #update_schema(class_definition, schema_field_definition, schema_field_options)
-
       # Track the priority of the field
       priority += 1
     end
@@ -189,16 +185,6 @@ def collect_schema_field_options(schema_field_definition)
 
   return 0
 end
-
-# This method will update the class definition with the new field
-def update_schema(class_definition, schema_field_definition, schema_field_options)
-  # Loop through field values and update the schema_field_definition
-  schema_field_options.keys.each do |key|
-    # If the user didn't enter a value, skip it
-  #  unless option[1].to_s.empty?
-      schema_field_definition["field"][key] = schema_field_options[key]
-  #  end
-  end
 
   # Add the field to the class definitio
   class_definition["object"]["schema"].append(schema_field_definition)
