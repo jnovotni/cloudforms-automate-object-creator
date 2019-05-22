@@ -4,26 +4,48 @@ require 'yaml'
 
 OBJECT_TYPE = ARGV[0]
 
-def create_method(method_name)
-  # Check if we're under a .class directory or a __methods__ directory
-    # Create __methods__ directory if it doesn't exist
+def create_method()
+  # Check if we're in a .class directory or a __methods__ directory
+  is_class_directory = File.exists?("__class__.yaml")
+  is_methods_directory = (Dir.pwd.split('/')[-1] == "__methods__")
+  if !is_class_directory && !is_methods_directory
+    puts "You must be in a class's directory or a __methods__ directory to create a method"
+    exit 0
+  end
+
+  # Create __methods__ directory if it doesn't exist
+  if !is_methods_directory && !File.directory?("__methods__")
+    puts "creating __methods__ directory"
+    Dir.mkdir("__methods__")
+  end
+
+  # If we're not already in the __methods__ directory, move into it
+  if !is_methods_directory
+    puts "changing to __methods__ dir"
+    Dir.chdir("__methods__")
+  end
+
+  # Get the method name
+  puts "Enter the desired method name"
+  method_name = STDIN.gets.chomp
   # Create empty Ruby file under __methods__ directory
   File.write("#{method_name}.rb","")
-  # Create a corresponding yaml definition for the method from the template
-    # Read yaml template and create object
+
+  # Read yaml template and create object
   method_definition = YAML.load_file("#{__dir__}/object_templates/method.yaml")
   # Set the method's name
   method_definition["object"]["attributes"]["name"] = method_name
   # Write the yaml file to disk
   File.write("#{method_name}.yaml", method_definition.to_yaml)
+
   return 0
 end
 
 def create_instance()
   # verify that we're under a .class directory... check for existence of __class__.yaml
   if !File.exists?("__class__.yaml")
-    puts "You must be in a class's directory. Look for directories with '.class' in the name and that contain a __class__.yaml file."
-    exit 1
+    puts "You must be in a class's directory to create an Instance"
+    exit 0
   end
 
   class_definition = YAML.load_file("__class__.yaml")
@@ -43,7 +65,7 @@ def create_instance()
 
     continue = true
     while continue
-      puts "Which field would you like to modify? Leave blank to exit."
+      puts "Which field would you like to modify? Leave blank to exit"
       puts "#{fields}"
       field_name = STDIN.gets.chomp
       while !fields.include?(field_name)
@@ -70,19 +92,129 @@ def create_instance()
     end
   end
   File.write("#{instance_name}.yaml", instance_definition.to_yaml)
+
+  return 0
+end
+
+def create_class()
+  # verify that you are in a namespace... look for __namespace__.yaml
+  if !File.exists?("__namespace__.yaml")
+    puts "You must be in a namespace's directory to create a Class"
+    exit 0
+  end
+
+  #import class definition
+  class_definition = YAML.load_file("#{__dir__}/object_templates/class.yaml")
+
+  # Set the class name
+  puts "Enter the desired class name"
+  class_name = STDIN.gets.chomp
+  class_definition["object"]["attributes"]["name"] = class_name
+
+  # Need to track priority
+  priority = 1
+  loop do
+    puts "Would you like to add a field to the class's schema? [y/n]"
+    add_field = STDIN.gets.chomp
+    if add_field == "n"
+      break
+    elsif add_field == "y"
+      schema_field_definition = YAML.load_file("#{__dir__}/object_templates/schema_field.yaml")
+      schema_field_definition["field"]["priority"] = priority.to_i
+      collect_schema_field_options(schema_field_definition)
+
+      #modify class definition
+      #create the schema section of the class definition
+      if class_definition["object"]["schema"].nil?
+        class_definition["object"]["schema"]=[]
+      end
+
+      # Add the field to the class definition
+      class_definition["object"]["schema"].append(schema_field_definition)
+
+      #Create a field definition and work with that object instead of the line below
+      #schema_field_definition = YAML.load_file("#{__dir__}/object_templates/schema_field.yaml")
+      #update_schema(class_definition, schema_field_definition, schema_field_options)
+
+      # Track the priority of the field
+      priority += 1
+    end
+  end
+
+  #create the directory with '.class' appended to the name
+  puts "creating class directory"
+  Dir.mkdir("#{class_name}.class")
+  puts "changing to class directory"
+  Dir.chdir("#{class_name}.class")
+  # write the file to disk
+  puts "creating class yaml file"
+  File.write("__class__.yaml", class_definition.to_yaml)
+
+  return 0
+end
+
+# This method prompts the user for several options related to the field
+# It will populate the schema_field_options hash with the values
+def collect_schema_field_options(schema_field_definition)
+  puts "field type [attribute, relationship, method, state]:"
+  schema_field_definition["field"]["aetype"] = STDIN.gets.chomp
+
+  puts "field name:"
+  schema_field_definition["field"]["name"] = STDIN.gets.chomp
+
+  #TODO: find out what datatypes there are
+  puts "field datatype [string, integer, array, etc]"
+  schema_field_definition["field"]["datatype"] = STDIN.gets.chomp
+
+  puts "default value [leave blank for no default]:"
+  schema_field_definition["field"]["default_value"] = "#{STDIN.gets.chomp}"
+
+  puts "message [leave blank for no message]:"
+  schema_field_definition["field"]["message"] = STDIN.gets.chomp
+
+  puts "collect [leave blank to collect nothing]:"
+  schema_field_definition["field"]["collect"] = STDIN.gets.chomp
+
+  puts "on entry [leave blank for no action]:"
+  schema_field_definition["field"]["on_entry"] = STDIN.gets.chomp
+
+  puts "on exit [leave blank for no action]:"
+  schema_field_definition["field"]["on_exit"] = STDIN.gets.chomp
+
+  puts "on error [leave blank for no action]:"
+  schema_field_definition["field"]["on_error"] = STDIN.gets.chomp
+
+  puts "max retries [leave blank for no limit]:"
+  schema_field_definition["field"]["max_retries"] = "#{STDIN.gets.chomp}"
+
+  return 0
+end
+
+# This method will update the class definition with the new field
+def update_schema(class_definition, schema_field_definition, schema_field_options)
+  # Loop through field values and update the schema_field_definition
+  schema_field_options.keys.each do |key|
+    # If the user didn't enter a value, skip it
+  #  unless option[1].to_s.empty?
+      schema_field_definition["field"][key] = schema_field_options[key]
+  #  end
+  end
+
+  # Add the field to the class definitio
+  class_definition["object"]["schema"].append(schema_field_definition)
   return 0
 end
 
 begin
   case OBJECT_TYPE
   when "method"
-    puts "Enter the desired method name"
-    method_name = STDIN.gets.chomp
-    create_method(method_name)
+    create_method()
   when "instance"
     create_instance()
+  when "class"
+    create_class()
   else
-    puts "Object type of #{OBJECT_TYPE} is not recognized"
+    puts "This script requires an automate object type as a paramater [method, instance, class, or namespace]"
     return 0
   end
   puts "#{OBJECT_TYPE} created"
