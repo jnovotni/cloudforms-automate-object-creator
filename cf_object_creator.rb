@@ -201,7 +201,7 @@ def create_namespace()
     return 0
   end
 
-  puts "Enter the desired instance name"
+  puts "Enter the desired namespace name"
   namespace_name = STDIN.gets.chomp
 
   # Create the directory
