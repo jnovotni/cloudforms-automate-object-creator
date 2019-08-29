@@ -37,11 +37,81 @@ MyNameSpaceName
 
 ### Creating a Class
 
+Before you can create a class, you must navigate to a namespace.
+
+Pass the parameter `class` to the script.
+
+```
+$ cf-object-creator class
+```
+
+You will be prompted for the class's name.
+
+```
+Enter the desired class name
+```
+
+Enter the name of the class.
+
+```
+Enter the desired class name
+MyClass
+```
+
+You will then be asked if you would like to add any fields to the class's schema. If you choose `n`, the script will create the class with a blank schema.
+
+```
+Would you like to add a field to the class's schema? [y/n]
+n
+creating class directory
+changing to class directory
+creating class yaml file
+class created
+```
+
+If you select `y`, the script will walk you through adding a field to the schema.
+
+```
+Would you like to add a field to the class's schema? [y/n]
+y
+field type [attribute, relationship, method, state]:
+attribute
+field name:
+my_attribute
+field datatype [string, integer, array, etc]
+string
+default value [leave blank for no default]:
+"a default value"   
+message [leave blank for no message]:
+
+collect [leave blank to collect nothing]:
+
+on entry [leave blank for no action]:
+
+on exit [leave blank for no action]:
+
+on error [leave blank for no action]:
+
+max retries [leave blank for no limit]:
+
+```
+
+Once you are finished, the script will ask you if you'd like to add anymore fields. Select `n` to complete the class creation or select `y` to repeat the above process for adding another field.
+
+```
+Would you like to add a field to the class's schema? [y/n]
+n
+creating class directory
+changing to class directory
+creating class yaml file
+class created
+```
+
 ### Creating an Instance
 
 Before you can create an instance, you must navigate to a class.
 
-Pass the parameter `instance` to the script
+Pass the parameter `instance` to the script.
 
 ```
 $ cf-object-creator instance
@@ -53,7 +123,7 @@ You will be prompted for the instance's name.
 Enter the desired instance name
 ```
 
-Enter the name of the instance
+Enter the name of the instance.
 
 ```
 Enter the desired instance name
@@ -94,7 +164,7 @@ Enter the new value
 my_bad_password
 ```
 
-Once you are done. Just leave the entry blank and press enter to complete the instance creation.
+After you enter your value, you will be brought to the list of fields and given the opportunity to select another field and modify its value. Once you are done modifying fields, leave the entry blank and press enter to complete the instance creation.
 
 
 ### Creating a Method
