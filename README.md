@@ -1,6 +1,6 @@
 # Description
 
-The goal of this project is to assist developers in writing code for CloudForms outside of the UI. This script will create CloudForms objects locally, such as classes, methods, namespaces, instances, etc.
+The goal of this project is to assist CloudForms administrators in writing code for CloudForms outside of the UI. This script will create CloudForms objects locally, such as classes, methods, namespaces, instances, etc.
 
 ## Usage
 
