@@ -55,42 +55,46 @@ def create_instance()
   instance_name = STDIN.gets.chomp
   instance_definition["object"]["attributes"]["name"] = instance_name
 
-  puts "Would you like you use the class defaults? [y/n]"
-  use_class_defaults = STDIN.gets.chomp
-  if use_class_defaults == "n"
-    fields = ""
-    class_definition["object"]["schema"].each do |field|
-      fields += field["field"]["name"] + " "
-    end
+  # If the schema of the class is empty, there is nothing more to do
+  # There are no fields to copy, no default values to set.
+  unless class_definition["object"]["schema"].nil?
+    puts "Would you like you use the class defaults? [y/n]"
+    use_class_defaults = STDIN.gets.chomp
+    if use_class_defaults == "n"
+      fields = ""
+      class_definition["object"]["schema"].each do |field|
+        fields += field["field"]["name"] + " "
+      end
 
-    continue = true
-    while continue
-      puts "Which field would you like to modify? Leave blank to exit"
-      puts "#{fields}"
-      field_name = STDIN.gets.chomp
-      while !fields.include?(field_name)
-        puts "There is no field named #{field_name}. Please select a field from the list below"
+      continue = true
+      while continue
+        puts "Which field would you like to modify? Leave blank to exit"
         puts "#{fields}"
         field_name = STDIN.gets.chomp
-      end
+        while !fields.include?(field_name)
+          puts "There is no field named #{field_name}. Please select a field from the list below"
+          puts "#{fields}"
+          field_name = STDIN.gets.chomp
+        end
 
-      if field_name == ""
-        continue = false
-        break
-      end
+        if field_name == ""
+          continue = false
+          break
+        end
 
-      puts "Enter the new value"
-      field_value = STDIN.gets.chomp
+        puts "Enter the new value"
+        field_value = STDIN.gets.chomp
 
-      # The yaml object is a little akward to work with...
-      # Make sure you have the fields attribute created
-      if instance_definition["object"]["fields"].nil?
-        instance_definition["object"]["fields"] = []
-      end
-      # Add the field and the value to the instance definition
-      instance_definition["object"]["fields"].append({"#{field_name}" => {"value" => "#{field_value}"}})
-    end
-  end
+        # The yaml object is a little akward to work with...
+        # Make sure you have the fields attribute created
+        if instance_definition["object"]["fields"].nil?
+          instance_definition["object"]["fields"] = []
+        end
+        # Add the field and the value to the instance definition
+        instance_definition["object"]["fields"].append({"#{field_name}" => {"value" => "#{field_value}"}})
+      end # while continue
+    end # if didn't want the class defaults
+  end # unless schema is empty
   File.write("#{instance_name}.yaml", instance_definition.to_yaml)
 
   return 0
