@@ -92,6 +92,7 @@ def create_instance()
         end
         # Add the field and the value to the instance definition
         instance_definition["object"]["fields"].append({"#{field_name}" => {"value" => "#{field_value}"}})
+        puts "field #{field_name} updated with value #{field_value}"
       end # while continue
     end # if didn't want the class defaults
   end # unless schema is empty
